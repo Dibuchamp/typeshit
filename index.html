@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>About You - Live Updates</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    #u {
+      width: 100%;
+      height: 20%;
+    }
+    #no {
+      border: none;
+    }
+    .yu {
+      border-radius: 15px;
+      color: red;
+      border: solid;
+      padding: 30px;
+    }
+    #status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 5px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 5px;
+    }
+    #output {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 300px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 5px;
+      background: #fff;
+    }
+    .error {
+      color: #b00;
+    }
+  </style>
+</head>
+<body bgcolor="yellow">
+
+  <!-- Status and output divs for WebSocket -->
+  <div id="status">Status: Not Connected</div>
+  <div id="output"></div>
+
+  <table border="0" bgcolor="black" id="u">
+    <tr><td>
+      <font face="cursive" size="30" color="white"><center><b>ABOUT YOU</b></center></font>
+    </td></tr>
+  </table>
+  <br><br>
+  <center>
+    <table border="1" bgcolor="red" class="yu" id="yo">
+      <tr>
+        <th class="yu" bgcolor="black">
+          <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/..." alt="parent picture" height="500px" width="400px">
+        </th>
+      </tr>
+      <tr>
+        <th bgcolor="white" id="no">
+          <font face="cursive" color="black">
+            Your name:<br>
+            Your hobbies:<br>
+            Your dream country:<br>
+            Job:<br>
+            Person you are inspired by:<br>
+            Your favourate food:<br>
+            Your favourate sport:<br>
+            Your age:<br>
+            You are student,.....'s parent.<br>
+            Favourate colour:
+          </font>
+        </th>
+      </tr>
+    </table>
+  </center>
+  <br><br>
+  <marquee bgcolor="white"><font size="15" face="verdana"><b>THANK YOU!</b></font></marquee>
+
+  <!-- WebSocket Script -->
+  <script>
+    // WebSocket server endpoint
+    const WS_URL = 'ws://localhost:8080';
+
+    // Cache DOM references
+    const statusDisplay = document.getElementById('status');
+    const outputDiv     = document.getElementById('output');
+
+    // Function to update status text
+    function updateStatus(text, isError = false) {
+      statusDisplay.textContent = `Status: ${text}`;
+      if (isError) {
+        statusDisplay.classList.add('error');
+      } else {
+        statusDisplay.classList.remove('error');
+      }
+    }
+
+    // Function to append messages to the output area
+    function appendMessage(message) {
+      const p = document.createElement('p');
+      p.className = 'message';
+      p.textContent = message;
+      outputDiv.appendChild(p);
+    }
+
+    // (Optional) Function to parse JSON
+    // If the messages are in JSON format, this can help you handle structured data
+    function parseJSONMessage(data) {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        // Return null or the raw data if parsing fails
+        return null;
+      }
+    }
+
+    // Initialize WebSocket
+    const socket = new WebSocket(WS_URL);
+
+    // Handle connection open
+    socket.addEventListener('open', () => {
+      console.log('Connected to WebSocket server');
+      updateStatus('Connected');
+    });
+
+    // Listen for messages from the server
+    socket.addEventListener('message', (event) => {
+      // Try to parse as JSON (if you expect JSON)
+      const parsedData = parseJSONMessage(event.data);
+
+      if (parsedData) {
+        // If it is valid JSON, you could transform or format it:
+        appendMessage(`Received JSON: ${JSON.stringify(parsedData, null, 2)}`);
+      } else {
+        // Otherwise, treat it as a plain string
+        appendMessage(`Received: ${event.data}`);
+      }
+    });
+
+    // Handle connection close
+    socket.addEventListener('close', () => {
+      console.log('Disconnected from WebSocket server');
+      updateStatus('Disconnected', true);
+    });
+
+    // Handle connection errors
+    socket.addEventListener('error', (event) => {
+      console.error('WebSocket error:', event);
+      updateStatus('Error', true);
+    });
+  </script>
+
+</body>
+</html>
