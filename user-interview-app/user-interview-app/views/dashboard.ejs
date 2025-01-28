@@ -1,0 +1,6 @@
+<h1>Welcome <%= user.username %></h1>
+<form action="/interview/submit" method="POST">
+  <input type="text" name="lovedOne" placeholder="Name of Loved One" required />
+  <textarea name="favoriteThings" placeholder="Favorite Things" required></textarea>
+  <button type="submit">Save</button>
+</form>
